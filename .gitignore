@@ -1,0 +1,6 @@
+build/
+build-app/
+*.pam
+.DS_Store
+build-deps/
+__pycache__/

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.warpgate.c1660w-universal-mac-driver</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/local/bin/c1660w-universal-mac-driver</string>
+		<string>server</string>
+		<string>-o</string>
+		<string>server-hostname=localhost</string>
+		<string>-o</string>
+		<string>listen-hostname=localhost</string>
+		<string>-o</string>
+		<string>server-port=8631</string>
+		<string>-o</string>
+		<string>server-options=no-tls</string>
+		<string>-o</string>
+		<string>log-level=info</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>C1660W_STATE_DIR</key>
+		<string>/Library/Application Support/c1660w-universal-mac-driver</string>
+	</dict>
+	<key>UserName</key>
+	<string>_lp</string>
+	<key>GroupName</key>
+	<string>_lp</string>
+	<key>Umask</key>
+	<integer>18</integer>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ProcessType</key>
+	<string>Background</string>
+	<key>StandardErrorPath</key>
+	<string>/Library/Application Support/c1660w-universal-mac-driver/stderr.log</string>
+</dict>
+</plist>

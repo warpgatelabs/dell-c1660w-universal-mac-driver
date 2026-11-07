@@ -1,0 +1,5 @@
+#!/bin/bash
+# SPDX-License-Identifier: Apache-2.0
+# Stop a running copy before its files are replaced.
+/bin/launchctl bootout system/com.warpgate.c1660w-universal-mac-driver 2>/dev/null || true
+exit 0

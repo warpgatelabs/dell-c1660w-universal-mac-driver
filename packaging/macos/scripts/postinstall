@@ -1,0 +1,68 @@
+#!/bin/bash
+# SPDX-License-Identifier: Apache-2.0
+#
+# Start the service. On a first install, also find C1660w printers on the network, add them
+# to the app, and add each one to macOS as a driverless (IPP Everywhere) printer.
+
+LABEL=com.warpgate.c1660w-universal-mac-driver
+STATE="/Library/Application Support/c1660w-universal-mac-driver"
+SOCK="$STATE/c1660w-universal-mac-driver.sock"
+APP=/usr/local/bin/c1660w-universal-mac-driver
+first_install=0
+[ -f "$STATE/c1660w-universal-mac-driver.state" ] || first_install=1
+
+/bin/mkdir -p "$STATE"
+/usr/sbin/chown _lp:_lp "$STATE"
+/bin/chmod 755 "$STATE"
+/bin/launchctl bootout "system/$LABEL" 2>/dev/null || true
+/bin/launchctl bootstrap system "/Library/LaunchDaemons/$LABEL.plist" || exit 1
+
+# Wait up to 30 seconds for the service to answer. The command-line tool reaches it through
+# its socket; if the socket isn't there, the tool would start a separate server instead, so
+# don't call it at all.
+ready=0
+for _ in $(/usr/bin/seq 30); do
+    if [ -S "$SOCK" ] && /usr/bin/curl -fs -o /dev/null "http://localhost:8631/"; then
+        ready=1
+        break
+    fi
+    /bin/sleep 1
+done
+if [ "$ready" != 1 ]; then
+    echo "postinstall: the service did not start; see $STATE/c1660w-universal-mac-driver.log" >&2
+    exit 0
+fi
+
+# On a first install, add each C1660w found on the network as "Dell C1660w" ("Dell C1660w 2",
+# ... for more than one).
+if [ "$first_install" = 1 ]; then
+    n=0
+    "$APP" find 2>/dev/null | while read -r uri; do
+        [ -n "$uri" ] || continue
+        n=$((n + 1))
+        name="Dell C1660w"
+        [ "$n" -gt 1 ] && name="Dell C1660w $n"
+        "$APP" add -d "$name" -m c1660w -v "$uri" >/dev/null 2>&1 || true
+    done
+fi
+
+# A printer's IPP path, made from its name the way PAPPL does: spaces, control characters
+# and / \ ' " ? # become "_", runs of "_" collapse, a trailing "_" goes, and a leading digit
+# gets a "_" in front.
+resource_of() {
+    local r
+    r="$(printf '%s' "$1" | LC_ALL=C /usr/bin/tr '\000-\040\177/\\'"'"'"?#' '_' |
+        /usr/bin/sed -e 's/__*/_/g' -e 's/_$//')"
+    case "$r" in [0-9]*) r="_$r" ;; esac
+    printf '/ipp/print/%s' "$r"
+}
+
+# Add a macOS queue for every printer in the app that doesn't have one yet.
+"$APP" printers 2>/dev/null | while read -r name; do
+    [ -n "$name" ] || continue
+    queue="$(printf '%s' "$name" | /usr/bin/tr -c 'A-Za-z0-9_-' '_')"
+    device="ipp://localhost:8631$(resource_of "$name")"
+    /usr/bin/lpstat -v 2>/dev/null | /usr/bin/grep -q " $device\$" && continue
+    /usr/sbin/lpadmin -p "$queue" -D "$name" -E -v "$device" -m everywhere || true
+done
+exit 0

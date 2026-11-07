@@ -1,0 +1,30 @@
+c1660w-universal-mac-driver
+Copyright 2026 Warpgate LLC
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Acknowledgements
+----------------
+
+The Printer Application is built on PAPPL, the Printer Application Library,
+by Michael R Sweet (https://www.msweet.org/pappl), licensed under the Apache
+License, Version 2.0 with exceptions. PAPPL is not included in this source
+repository. Binary distributions that link it include its copyright and
+license notices.
+
+Dave Coffin was the first to document the HBPL v1 print format publicly,
+in his foo2hbpl1 driver (distributed with foo2zjs). This project contains no
+code from foo2hbpl1 or foo2zjs. Its format specification (SPEC.md) was
+written from observation of real print jobs, and the encoder, decoder and
+tests were written from that specification alone.
+
+The color conversion tables in app/color_tables.h were measured from the
+printer manufacturer's original driver, by recording the printer color that
+driver produced for each RGB input.
+
+Trademarks
+----------
+
+Dell is a trademark of Dell Inc. or its subsidiaries. This project is not
+affiliated with, endorsed by or supported by Dell. Model names are used only
+to identify the printers this software works with.
